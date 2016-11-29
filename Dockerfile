@@ -30,12 +30,12 @@ RUN echo "Installing jenkins ${JENKINS_VERSION} ..." && \
 RUN echo "Recursive solve and reduce plugin dependencies ..." && \
     bash -c 'curl -sSO https://updates.jenkins-ci.org/current/update-center.actual.json && \
     function solve { \
-        for plugin in $(cat update-center.actual.json | jq --arg p "${1%:*}" -r '"'"'.plugins[] | select(.name == $p) | .dependencies[] | select(.optional == false) | .name + ":" + .version'"'"');do \
-            echo $plugin >> /var/jenkins_home/plugins.txt; \
-            solve $plugin; \
+        for dependency in $(cat update-center.actual.json | jq --arg p "${1%:*}" -r '"'"'.plugins[] | select(.name == $p) | .dependencies[] | select(.optional == false) | .name + ":" + .version'"'"');do \
+            echo $dependency >> /var/jenkins_home/plugins.txt; \
+            solve $dependency; \
         done \
     } && \
-    solve $(tr '"'"'\n'"'"' '"'"' '"'"' < /var/jenkins_home/plugins.txt) && \
+    for plugin in $(tr '"'"'\n'"'"' '"'"' '"'"' < /var/jenkins_home/plugins.txt);do solve $plugin; done && \
     sort -Vr /var/jenkins_home/plugins.txt | sort -u -t: -k1,1 -o /var/jenkins_home/plugins.txt'
 
 # Jenkins install plugins from plugins.txt
