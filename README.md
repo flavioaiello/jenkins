@@ -29,6 +29,9 @@ services:
       - JENKINS_OPTS=''
       - JENKINS_EXECUTORS=7
       - JENKINS_BOOTSTRAP_REPOSITORY=
+      - JENKINS_BOOTSTRAP_REPOSITORY_BRANCH=
+      - REGISTRY_USERNAME=
+      - REGISTRY_PASSWORD=
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /data/jenkins_home/builds:/var/jenkins_home/builds
@@ -53,6 +56,9 @@ services:
       - JENKINS_OPTS=''
       - JENKINS_EXECUTORS=7
       - JENKINS_BOOTSTRAP_REPOSITORY=
+      - JENKINS_BOOTSTRAP_REPOSITORY_BRANCH=
+      - REGISTRY_USERNAME=
+      - REGISTRY_PASSWORD=
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /data/jenkins_home/builds:/var/jenkins_home/builds
@@ -98,7 +104,8 @@ As all the data needed is in the /var/jenkins_home directory - so depending on h
 The number of build executors can simply be defined by setting an environment variable on your docker container. By default its set to 2 executors, but you can extend the image and change it to your desired number of executors. This can be done by eighter follow the sample docker compose excerpt above or passing parameters to the run command like below:
 
 ```
-docker run --name myjenkins -p 8080:8080 -e JENKINS_EXECUTORS=7 serverking/jenkins
+docker build -t jenkins .
+docker run --name myjenkins -p 8080:8080 -e JENKINS_EXECUTORS=7 jenkins
 ```
 
 ### Attaching build executors
@@ -112,7 +119,8 @@ You might need to customize the JVM running Jenkins, typically to pass system pr
 variable for this purpose :
 
 ```
-docker run --name myjenkins -p 8080:8080 -e JAVA_OPTS='-Duser.timezone=Europe/Zurich -Dhudson.footerURL=http://mycompany.com' serverking/jenkins
+docker build -t jenkins .
+docker run --name myjenkins -p 8080:8080 -e JAVA_OPTS='-Duser.timezone=Europe/Zurich -Dhudson.footerURL=http://mycompany.com' jenkins
 ```
 
 ### Certificates
@@ -120,7 +128,8 @@ docker run --name myjenkins -p 8080:8080 -e JAVA_OPTS='-Duser.timezone=Europe/Zu
 You also can define jenkins arguments as `JENKINS_OPTS`. This is usefull to define a set of arguments to pass to jenkins launcher. The following sample Dockerfile uses this option to force use of HTTPS with a certificate. For security reasons the certificate will be stored on the host and mounted in to the container. This can be done by eighter follow the sample docker compose excerpt above or passing parameters to the run command like below:
 
 ```
-docker run --name myjenkins -p 8443:8443 -e JENKINS_OPTS="--httpPort=-1 --httpsPort=8443 --httpsCertificate=/var/jenkins_home/certs/fullchain.pem --httpsPrivateKey=/var/jenkins_home/certs/fullchain.key" serverking/jenkins
+docker build -t jenkins .
+docker run --name myjenkins -p 8443:8443 -e JENKINS_OPTS="--httpPort=-1 --httpsPort=8443 --httpsCertificate=/var/jenkins_home/certs/fullchain.pem --httpsPrivateKey=/var/jenkins_home/certs/fullchain.key" jenkins
 ```
 
 ### Installing tools
@@ -137,8 +146,39 @@ groovy:latest
 ...
 ```
 
-## Todo's
+## Capabilities
 - [x] JenkinsCI official refactoring
 - [x] DSL plugin bootstrap setup 
-- [ ] DSL sample jobs
+
+## Configuration
+Please define your pipeline or multibranch pipeline jobs directly into `config/jobs.groovy`. If you wish to organize your jobs you can configure views directly in `config/views.groovy`. Use a `Jenkinsfile` on each software repository you wish to build. This setup is built in on jenkins using the plugins as described below.
+
+### JenkinsCI [Job DSL Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Job+DSL+Plugin)
+Please refer to the [official tutorial](https://github.com/jenkinsci/job-dsl-plugin/wiki) and the [Job DSL Playground](http://job-dsl.herokuapp.com/). Not all of the 1000+ Jenkins plugins are supported by the built-in DSL. If the API Viewer does not list support for a certain plugin, the Automatically Generated DSL can be used to fill the gap.
+
+### JenkinsCI [Pipeline Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Plugin)
+Please refer to the [official tutorial](https://github.com/jenkinsci/pipeline-plugin/blob/master/TUTORIAL.md).
+
+Browse the Jenkins issue tracker to see any open issues on Jenkins and according plugins!
+
+## Versioning
+Versioning is an issue when deploying the latest release. For this purpose an additional label will be provided during build time. 
+The Dockerfile must be extended with an according label argument as shown below:
+```
+ARG TAG
+LABEL TAG=${TAG}
+```
+Arguments must be passed to the build process using `--build-arg TAG="${TAG}"`.
+
+## Reporting
+```
+docker inspect --format \
+&quot;{{ index .Config.Labels \&quot;com.docker.compose.project\&quot;}},\
+ {{ index .Config.Labels \&quot;com.docker.compose.service\&quot;}},\
+ {{ index .Config.Labels \&quot;TAG\&quot;}},\
+ {{ index .State.Status }},\
+ {{ printf \&quot;%.16s\&quot; .Created }},\
+ {{ printf \&quot;%.16s\&quot; .State.StartedAt }},\
+ {{ index .RestartCount }}&quot; $(docker ps -f name=${STAGE} -q) &gt;&gt; reports/${SHORTNAME}.report
+```
 

@@ -5,7 +5,7 @@ job('bootstrap') {
           url System.getenv('JENKINS_BOOTSTRAP_REPOSITORY');
           credentials 'git'
         }
-        branch 'develop'
+        branch System.getenv('JENKINS_BOOTSTRAP_REPOSITORY_BRANCH');
       }
     }
     triggers {
@@ -13,7 +13,7 @@ job('bootstrap') {
     }
     steps {
         dsl {
-            external 'dsl/**/*.groovy'
+            external 'config/**/*.groovy'
         }
     }
     publishers {
