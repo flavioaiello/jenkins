@@ -9,7 +9,7 @@ ENV JENKINS_VERSION 2.32.2
 COPY files /
 
 # Packages
-RUN set -x && \
+RUN set -ex && \
     apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main && \
     apk add --no-cache --repository  http://dl-cdn.alpinelinux.org/alpine/edge/community && \
     apk update && \
@@ -22,7 +22,7 @@ RUN set -x && \
     pip install docker-compose
 
 # Install Jenkins and plugins from plugins.txt
-RUN set -x && \
+RUN set -ex && \
     echo "*** Installing jenkins ***" && \
     curl -sSL --create-dirs --retry 1 http://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war -o /usr/share/jenkins/jenkins.war && \
     echo "*** Recursive solve and reduce plugin dependencies ***" && \
