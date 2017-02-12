@@ -1,6 +1,6 @@
 # The supercharged Jenking v2 Docker image
 
-![Supercharged Jenkins](superhero.png)
+![Supercharged Jenkins](https://github.com/flavioaiello/jenkins-dsl/blob/develop/superhero.png)
 
 This is the ready to go fully declarative supercharged Jenkins Continuous Integration and Delivery server based up on the official release. [http://jenkins-ci.org/](http://jenkins-ci.org/). This one is running in multiple production environments and it's optimized to run on secure zones. The plugins are also part of the image so you don't need access to docker hub to spin up a container.
 
