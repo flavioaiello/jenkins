@@ -21,7 +21,7 @@ version: '2'
 services:
 
   jenkins:
-    build: .
+    image: flavioaiello/jenkins-dsl
     privileged: true
     network_mode: "bridge"
     environment:
@@ -38,34 +38,6 @@ services:
       - /data/jenkins_home/workspace:/var/jenkins_home/workspace
     ports:
         - "8080:8080"
-    restart: always
-```
-#### Docker Compose sample recipe(https)
-
-```
-version: '2'
-
-services:
-
-  jenkins:
-    build: .
-    privileged: true
-    network_mode: "bridge"
-    environment:
-      - JAVA_OPTS=-Duser.timezone=Europe/Zurich
-      - JENKINS_OPTS=''
-      - JENKINS_EXECUTORS=7
-      - JENKINS_BOOTSTRAP_REPOSITORY=
-      - JENKINS_BOOTSTRAP_REPOSITORY_BRANCH=
-      - REGISTRY_USERNAME=
-      - REGISTRY_PASSWORD=
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /data/jenkins_home/builds:/var/jenkins_home/builds
-      - /data/jenkins_home/workspace:/var/jenkins_home/workspace
-      - /data/jenkins_home/certs:/var/jenkins_home/certs
-    ports:
-        - "8443:8443"
     restart: always
 ```
 
@@ -161,24 +133,5 @@ Please refer to the [official tutorial](https://github.com/jenkinsci/pipeline-pl
 
 Browse the Jenkins issue tracker to see any open issues on Jenkins and according plugins!
 
-## Versioning
-Versioning is an issue when deploying the latest release. For this purpose an additional label will be provided during build time. 
-The Dockerfile must be extended with an according label argument as shown below:
-```
-ARG TAG
-LABEL TAG=${TAG}
-```
-Arguments must be passed to the build process using `--build-arg TAG="${TAG}"`.
-
-## Reporting
-```
-docker inspect --format \
-&quot;{{ index .Config.Labels \&quot;com.docker.compose.project\&quot;}},\
- {{ index .Config.Labels \&quot;com.docker.compose.service\&quot;}},\
- {{ index .Config.Labels \&quot;TAG\&quot;}},\
- {{ index .State.Status }},\
- {{ printf \&quot;%.16s\&quot; .Created }},\
- {{ printf \&quot;%.16s\&quot; .State.StartedAt }},\
- {{ index .RestartCount }}&quot; $(docker ps -f name=${STAGE} -q) &gt;&gt; reports/${SHORTNAME}.report
-```
-
+## Contribute
+If you want to further customize this image, please feel free to contribute.
