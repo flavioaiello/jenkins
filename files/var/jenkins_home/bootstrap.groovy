@@ -3,7 +3,7 @@ job('bootstrap') {
       git {
         remote {
           url System.getenv('JENKINS_BOOTSTRAP_REPOSITORY');
-          credentials 'git'
+          credentials System.getenv('JENKINS_BOOTSTRAP_REPOSITORY_USERNAME') ? System.getenv('JENKINS_BOOTSTRAP_REPOSITORY_USERNAME') : 'git'
         }
         branch System.getenv('JENKINS_BOOTSTRAP_REPOSITORY_BRANCH');
       }

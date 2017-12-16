@@ -15,8 +15,8 @@ try {
     /* Credentials to connect to Git repo */
     addGitCredentials(globalDomain)
 
-    /* Credentials to connect to Docker registry */
-    addDockerLoginCredentials(globalDomain)
+    /* Generic Username Password Credentials */
+    addUsernamePasswordCredentials(globalDomain)
 }
 catch (Exception e) {
     println("Exception: " + e.message)
@@ -41,20 +41,32 @@ def addGitCredentials(globalDomain) {
 }
 
 /**
- * Add docker registry credentials
+ * Add generic credentials
  *
  * @param globalDomain
  * @return
  */
-def addDockerLoginCredentials(globalDomain) {
-    availableUsernamePwdCredentials = CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class, Jenkins.getInstance())
-    dockerLoginCredentialsMatcher = CredentialsMatchers.withUsername("docker")
-    dockerLoginExistingCredentials = CredentialsMatchers.firstOrNull(availableUsernamePwdCredentials, dockerLoginCredentialsMatcher)
-    dockerLoginCredentials = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL, "docker", "Docker Login Configuration",  System.getenv('REGISTRY_USERNAME'),  System.getenv('REGISTRY_PASSWORD'))
-    if (dockerLoginExistingCredentials != null) {
-        credentialsStore.updateCredentials(globalDomain, dockerLoginExistingCredentials, dockerLoginCredentials)
-    }
-    else {
-        credentialsStore.addCredentials(globalDomain, dockerLoginCredentials)
+def addUsernamePasswordCredentials(globalDomain) {
+
+    def credentials = System.getenv('JENKINS_BASIC_CREDENTIALS')
+
+    // Backward compatibility for docker registry specific credentials
+    credentials += System.getenv('REGISTRY_USERNAME') ? " docker:" + System.getenv('REGISTRY_USERNAME') + ":" + System.getenv('REGISTRY_PASSWORD') : ""
+
+    for(credential in credentials.split()) {
+
+        availableUsernamePwdCredentials = CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class, Jenkins.getInstance())
+        myLoginCredentialsMatcher = CredentialsMatchers.withUsername(credential.split(':')[0])
+        myLoginExistingCredentials = CredentialsMatchers.firstOrNull(availableUsernamePwdCredentials, myLoginCredentialsMatcher)
+        myLoginCredentials = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL, credential.split(':')[0], "Generic credentials", credential.split(':')[1], credential.split(':')[2])
+
+        if (myLoginExistingCredentials != null) {
+            println("update credentials with userid " + credential.split(':')[0] + " and username " + credential.split(':')[1])
+            credentialsStore.updateCredentials(globalDomain, myLoginExistingCredentials, myLoginCredentials)
+        }
+        else {
+            println("create credentials with userid " + credential.split(':')[0] + " and username " + credential.split(':')[1])
+            credentialsStore.addCredentials(globalDomain, myLoginCredentials)
+        }
     }
 }

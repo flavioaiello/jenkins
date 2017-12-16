@@ -27,13 +27,13 @@ def enableLDAP() {
     
     if (System.getenv('LDAP_PWD')) {
       /* check with /etc/sssd/sssd.conf */
-      String server = 'ldaps://yourldap:636'
+      String server = 'ldaps://ods-ldap.itoper.local:636'
       String rootDN = ''
-      String userSearchBase = 'ou=Person,dc=yourdc,dc=yourdc'
+      String userSearchBase = 'ou=Person,dc=its,dc=scom'
       String userSearch = 'uid={0}'
-      String groupSearchBase = 'ou=Group,dc=yourdc,dc=yourdc'
+      String groupSearchBase = 'ou=Group,dc=vab,dc=scom'
       String groupSearchFilter = '(& (cn={0}) (objectclass=group) )'
-      String managerDN = 'cn=yourcn,ou=yourou,dc=yourdc'
+      String managerDN = 'cn=vabAgent,ou=customerAgent,dc=scom'
       // would be nice to have hash or read from /etc/sssd/sssd.conf
       // until then done with ENV LDAP_PWD
       String managerPasswordSecret =  System.getenv('LDAP_PWD')
