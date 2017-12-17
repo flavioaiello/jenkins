@@ -1,10 +1,10 @@
-FROM alpine:3.6
+FROM alpine:3.7
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 ENV PATH ${PATH}:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 
 ENV JENKINS_HOME /var/jenkins_home
-ENV JENKINS_VERSION 2.87
+ENV JENKINS_VERSION 2.89.2
 ENV JENKINS_PLUGINS_LATEST true
 ENV FC_LANG de-CH
 ENV LC_CTYPE de_CH.UTF-8
