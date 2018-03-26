@@ -1,6 +1,6 @@
-[![Docker Build Status](https://img.shields.io/docker/build/flavioaiello/jenkins-dsl.svg?style=for-the-badge)](https://hub.docker.com/r/flavioaiello/jenkins-dsl/)
-[![Docker Stars](https://img.shields.io/docker/stars/flavioaiello/jenkins-dsl.svg?style=for-the-badge)](https://hub.docker.com/r/flavioaiello/jenkins-dsl/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/flavioaiello/jenkins-dsl.svg?style=for-the-badge)](https://hub.docker.com/r/flavioaiello/jenkins-dsl/)
+[![Docker Build Status](https://img.shields.io/docker/build/flavioaiello/jenkins-dsl.svg)](https://hub.docker.com/r/flavioaiello/jenkins-dsl/)
+[![Docker Stars](https://img.shields.io/docker/stars/flavioaiello/jenkins-dsl.svg)](https://hub.docker.com/r/flavioaiello/jenkins-dsl/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/flavioaiello/jenkins-dsl.svg)](https://hub.docker.com/r/flavioaiello/jenkins-dsl/)
 
 # The supercharged Jenking v2 Docker image (not official - based on alpine)
 
