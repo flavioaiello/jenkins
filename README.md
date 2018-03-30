@@ -8,6 +8,8 @@
 
 This is the supercharged Jenkins Continuous Integration and Delivery server based up on the official release. [http://jenkins-ci.org/](http://jenkins-ci.org/).
 
+![Supercharged Jenkins](https://github.com/flavioaiello/jenkins-dsl/blob/master/theme.png?raw=true)
+
 ## Usage
 
 ### Docker Compose
@@ -20,7 +22,7 @@ docker-compose up -d
 #### Docker compose sample recipe (http)
 
 ```
-version: '2'
+version: '3'
 
 services:
 
@@ -47,7 +49,7 @@ services:
 #### Docker Compose sample recipe(https)
 
 ```
-version: '2'
+version: '3'
 
 services:
 
