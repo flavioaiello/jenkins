@@ -4,7 +4,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 ENV PATH ${PATH}:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 
 ENV JENKINS_HOME /var/jenkins_home
-ENV JENKINS_VERSION 2.89.2
+ENV JENKINS_VERSION 2.107.1
 ENV JENKINS_PLUGINS_LATEST true
 ENV FC_LANG de-CH
 ENV LC_CTYPE de_CH.UTF-8
@@ -14,10 +14,9 @@ COPY files /
 
 # Packages
 RUN set -ex;\
-    echo "@community http://nl.alpinelinux.org/alpine/v3.6/community" >> /etc/apk/repositories;\
     apk update;\
     apk upgrade;\
-    apk add --no-cache tini ca-certificates openjdk8 bash git curl zip wget docker@community fontconfig ttf-dejavu jq coreutils openssh py2-pip;\
+    apk add --no-cache tini ca-certificates openjdk8 bash git curl zip wget docker fontconfig ttf-dejavu jq coreutils openssh py2-pip;\
     rm -rf /var/cache/apk/*;\
     echo "*** fix key permissions ***";\
     chmod 600 /root/.ssh/id_rsa;\
@@ -50,4 +49,4 @@ RUN set -ex;\
 EXPOSE 8080 8443
 
 ENTRYPOINT ["/sbin/tini", "--", "entrypoint.sh"]
-CMD ["java", "${JAVA_OPTS}", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-XX:+HeapDumpOnOutOfMemoryError", "-XshowSettings:vm", "-Djava.awt.headless=true", "-Djenkins.install.runSetupWizard=false", "-jar", "/usr/share/jenkins/jenkins.war", "${JENKINS_OPTS}"]
+CMD ["java", "${JAVA_OPTS}", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-XX:MaxRAMFraction=2", "-XX:+HeapDumpOnOutOfMemoryError", "-XshowSettings:vm", "-Djava.awt.headless=true", "-Djenkins.install.runSetupWizard=false", "-jar", "/usr/share/jenkins/jenkins.war", "${JENKINS_OPTS}"]

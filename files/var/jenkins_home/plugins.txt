@@ -1,12 +1,9 @@
 github-organization-folder:latest
 workflow-aggregator:latest
 git:latest
-build-blocker-plugin:latest
 job-dsl:latest
-gradle:latest
 ldap:latest
-docker-plugin:latest
-docker-workflow:latest
 docker-build-publish:latest
 credentials-binding:latest
 pipeline-model-definition:latest
+simple-theme-plugin:latest
