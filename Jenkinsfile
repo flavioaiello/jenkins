@@ -1,40 +1,46 @@
 #!groovy
 
-def dockerImageName = env.JOB_NAME.substring(env.JOB_NAME.lastIndexOf('/') + 1)
-def dockerRegistry = 'http://localhost:5000'
-def dockerRepository = 'default'
-def dockerCredentialsId = 'docker'
+def dockerImageName = env.JOB_NAME
+def dockerRegistry = 'https://myprivateregistry'
+def dockerCredentialsId = 'myCredentials'
 
 node {
     stage('Checkout') {
         checkout scm
     }
 
-    def dockerImageTag = sh(returnStdout: true, script: 'git describe --all').trim().replaceAll(/(.*\/)?(.+)/,'$2')
-    def pushAsLatest = (dockerImageTag ==~ /v(\d+.\d+.\d+)/)
+    def versionTag = sh(returnStdout: true, script: 'git describe --all').trim().replaceAll(/(.*\/)?(.+)/, '$2')
+    def baseTag = (versionTag == ~/v(\d+.\d+.\d+)/) ? 'latest' : versionTag
+    def latestTag = (versionTag == ~/v(\d+.\d+.\d+)/) ? 'latest' : null
+    def dockerImage
 
-    stage('Env') {
-        echo "*** Show env variables: ***" + \
-             "\n dockerRegistry: " + dockerRegistry + \
-             "\n dockerRepository: " + dockerRepository + \
-             "\n dockerCredentialsId: " + dockerCredentialsId + \
-             "\n dockerImageName: " + dockerImageName + \
-             "\n dockerImageTag: " + dockerImageTag
-    }
-
-    stage('Build & Push') {
+    stage('Build') {
 
         docker.withRegistry(dockerRegistry, dockerCredentialsId) {
 
-            // Set repository and image name
-            def image = docker.build dockerRepository + "/" + dockerImageName, "--build-arg TAG=${dockerImageTag} ."
+            echo "*** Set the docker base image tag to inherit from ***"
+            sh "sed -i 's/\${BASE_TAG}/${baseTag}/g' Dockerfile"
 
-            // Push actual tag
-            image.push(dockerImageTag)
+            echo "*** Set also the docker latest tag if any ***"
+            latestTagSuffix = (latestTag) ? '-t ' + dockerImageName + ':' + latestTag : ''
 
-            // Push latest tag if it's a release
-            if (pushAsLatest) {
-                image.push('latest')
+            echo "*** Start building ... ***"
+            dockerImage = docker.build dockerImageName + ":${versionTag}", "${latestTagSuffix} ."
+
+            echo "*** Docker image successfully built. ***"
+        }
+    }
+
+    stage('Push') {
+
+        docker.withRegistry(dockerRegistry, dockerCredentialsId) {
+
+            echo "*** Push version ... ***"
+            dockerImage.push(versionTag)
+
+            if (latestTag) {
+                echo "*** Push latest ... ***"
+                dockerImage.push(latestTag)
             }
 
             echo "*** Docker image successfully pushed to registry. ***"
