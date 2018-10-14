@@ -4,6 +4,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 ENV PATH ${PATH}:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 ENV JENKINS_HOME /var/jenkins_home
 ENV JENKINS_VERSION 2.138.2
+ENV JENKINS_PLUGINS_LATEST true
 ENV FC_LANG de-CH
 ENV LC_CTYPE de_CH.UTF-8
 
@@ -13,7 +14,6 @@ COPY files /
 # Packages
 RUN set -ex;\
     apk update;\
-    apk upgrade;\
     apk add --no-cache tini ca-certificates openjdk8 bash git curl zip wget docker fontconfig ttf-dejavu jq coreutils openssh py2-pip;\
     rm -rf /var/cache/apk/*;\
     echo "*** fix key permissions ***";\
@@ -24,7 +24,7 @@ RUN set -ex;\
 
 # Install Jenkins and plugins from plugins.txt
 RUN echo "*** Installing jenkins ***";\
-    curl -L --create-dirs --retry 1 http://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war -o /usr/share/jenkins/jenkins.war;\
+    curl -sSL --create-dirs --retry 1 http://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war -o /usr/share/jenkins/jenkins.war;\
     echo "*** Recursive solve and reduce plugin dependencies ***";\
     curl -sSO --retry 3 https://updates.jenkins-ci.org/current/update-center.actual.json;\
     false; until [ $? -eq 0 ]; do \
@@ -36,9 +36,8 @@ RUN echo "*** Installing jenkins ***";\
     rm /var/jenkins_home/check;\
     echo "*** Jenkins install plugins from plugins.txt *** ";\
     while read plugin; do \
-    plugin="${plugin%:*}:latest";\
-    echo "*** Downloading ${plugin} ***";\
-    curl -L --create-dirs --retry 3 https://updates.jenkins-ci.org/download/plugins/${plugin%:*}/${plugin#*:}/${plugin%:*}.hpi -o /var/jenkins_home/plugins/${plugin%:*}.jpi;\
+    if $JENKINS_PLUGINS_LATEST; then plugin="${plugin%:*}:latest"; else plugin="${plugin%:*}:${plugin#*:}"; fi;\    echo "*** Downloading ${plugin} ***";\
+    curl -sSL --create-dirs --retry 3 https://updates.jenkins-ci.org/download/plugins/${plugin%:*}/${plugin#*:}/${plugin%:*}.hpi -o /var/jenkins_home/plugins/${plugin%:*}.jpi;\
     touch /var/jenkins_home/plugins/${plugin%:*}.jpi.pinned;\
     done < /var/jenkins_home/plugins.txt
 
