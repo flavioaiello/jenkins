@@ -24,7 +24,7 @@ RUN set -ex;\
 
 # Install Jenkins and plugins from plugins.txt
 RUN echo "*** Installing jenkins ***";\
-    curl -sSL --create-dirs --retry 1 http://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war -o /usr/share/jenkins/jenkins.war;\
+    curl -sSL --create-dirs --retry 3 http://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war -o /usr/share/jenkins/jenkins.war;\
     echo "*** Recursive solve and reduce plugin dependencies ***";\
     curl -sSO --retry 3 https://updates.jenkins-ci.org/current/update-center.actual.json;\
     false; until [ $? -eq 0 ]; do \
@@ -36,9 +36,9 @@ RUN echo "*** Installing jenkins ***";\
     rm /var/jenkins_home/check;\
     echo "*** Jenkins install plugins from plugins.txt *** ";\
     while read plugin; do \
-    if $JENKINS_PLUGINS_LATEST; then plugin="${plugin%:*}:latest"; else plugin="${plugin%:*}:${plugin#*:}"; fi;\    echo "*** Downloading ${plugin} ***";\
-    curl -sSL --create-dirs --retry 3 https://updates.jenkins-ci.org/download/plugins/${plugin%:*}/${plugin#*:}/${plugin%:*}.hpi -o /var/jenkins_home/plugins/${plugin%:*}.jpi;\
-    touch /var/jenkins_home/plugins/${plugin%:*}.jpi.pinned;\
+       if $JENKINS_PLUGINS_LATEST; then plugin="${plugin%:*}:latest"; else plugin="${plugin%:*}:${plugin#*:}"; fi;\    echo "*** Downloading ${plugin} ***";\
+       curl -sSL --create-dirs --retry 3 https://updates.jenkins-ci.org/download/plugins/${plugin%:*}/${plugin#*:}/${plugin%:*}.hpi -o /var/jenkins_home/plugins/${plugin%:*}.jpi;\
+       touch /var/jenkins_home/plugins/${plugin%:*}.jpi.pinned;\
     done < /var/jenkins_home/plugins.txt
 
 EXPOSE 8080 8443
